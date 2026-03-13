@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 
 const TIERS = {
-  TIER1:   { label: "Tier 1",  color: "#00ff9d" },
-  TIER2:   { label: "Tier 2",  color: "#00c8ff" },
-  TIER3:   { label: "Tier 3",  color: "#a78bfa" },
-  OFFICIAL:{ label: "Official",color: "#fbbf24" },
+  TIER1:   { label: "Tier 1",   color: "#00ff9d" },
+  TIER2:   { label: "Tier 2",   color: "#00c8ff" },
+  TIER3:   { label: "Tier 3",   color: "#a78bfa" },
+  OFFICIAL:{ label: "Official", color: "#fbbf24" },
 };
 
 function useIsMobile() {
@@ -42,12 +42,12 @@ function ConfidenceMeter({ level }) {
   return (
     <div>
       <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"6px" }}>
-        <span style={{ fontSize:"11px", color:"#bbb", letterSpacing:"0.1em", textTransform:"uppercase" }}>Confidence</span>
-        <span style={{ fontSize:"11px", color, fontWeight:700 }}>{level}</span>
+        <span style={{ fontSize:"13px", color:"#ccc", letterSpacing:"0.1em", textTransform:"uppercase" }}>Confidence</span>
+        <span style={{ fontSize:"13px", color, fontWeight:700 }}>{level}</span>
       </div>
       <div style={{ background:"#1a1a1a", borderRadius:"2px", height:"5px", overflow:"hidden" }}>
         <div style={{ width:`${pct}%`, height:"100%", background:color,
-          borderRadius:"2px", transition:"width 1s ease", boxShadow:`0 0 8px ${color}` }} />
+          borderRadius:"2px", transition:"width 1s ease" }} />
       </div>
     </div>
   );
@@ -60,12 +60,12 @@ function SourceChip({ source }) {
     <div style={{ border:`1px solid ${color}44`, background:`${color}0f`,
       borderRadius:"4px", padding:"8px 10px", display:"flex", gap:"8px", alignItems:"flex-start" }}>
       <div style={{ width:"7px", height:"7px", borderRadius:"50%", background:color,
-        marginTop:"4px", flexShrink:0, boxShadow:`0 0 6px ${color}` }} />
+        marginTop:"4px", flexShrink:0 }} />
       <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ fontSize:"12px", fontWeight:700, color:"#e0e0e0", fontFamily:"monospace" }}>{source.name}</div>
-        <div style={{ fontSize:"10px", color:"#aaa", marginTop:"2px", wordBreak:"break-word" }}>{source.relevance}</div>
+        <div style={{ fontSize:"13px", fontWeight:700, color:"#f0f0f0", fontFamily:"monospace" }}>{source.name}</div>
+        <div style={{ fontSize:"12px", color:"#bbb", marginTop:"3px", wordBreak:"break-word", lineHeight:1.5 }}>{source.relevance}</div>
       </div>
-      <div style={{ fontSize:"9px", color, fontWeight:700, flexShrink:0, paddingTop:"2px" }}>{source.tier}</div>
+      <div style={{ fontSize:"11px", color, fontWeight:700, flexShrink:0, paddingTop:"2px" }}>{source.tier}</div>
     </div>
   );
 }
@@ -105,7 +105,7 @@ export default function TruthGuard() {
   const phases = [
     "Initializing TruthGuard...",
     "Parsing claim...",
-    "Generating search queries...",
+    "Searching the web for latest info...",
     "Consulting trusted sources...",
     "Cross-verifying evidence...",
     "Rendering verdict...",
@@ -114,23 +114,18 @@ export default function TruthGuard() {
   async function verify() {
     if (!claim.trim() || loading) return;
     setLoading(true); setResult(null); setError(null);
-
     let pi = 0;
     const phaseInterval = setInterval(() => {
       setPhase(phases[Math.min(pi++, phases.length - 1)]);
     }, 700);
-
     try {
-      // Calls OUR backend - not Groq directly. Key is safe!
       const response = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ claim: claim.trim() }),
       });
-
       const parsed = await response.json();
       if (!response.ok) throw new Error(parsed.error || "Verification failed");
-
       clearInterval(phaseInterval);
       setResult(parsed);
       setHistory(h => [{ claim:claim.trim(), verdict:parsed.verdict, time:new Date() }, ...h.slice(0,4)]);
@@ -160,69 +155,58 @@ export default function TruthGuard() {
         button { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
       `}</style>
 
-      {/* HEADER */}
       <div style={{ borderBottom:"1px solid #1a1a1a", padding:isMobile?"12px 16px":"16px 32px",
         display:"flex", alignItems:"center", justifyContent:"space-between",
-        background:"#08080899", backdropFilter:"blur(10px)", position:"sticky", top:0, zIndex:100 }}>
+        background:"#08080899", position:"sticky", top:0, zIndex:100 }}>
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
           <div style={{ width:"30px", height:"30px", border:"1px solid #00ff9d",
             display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
             <span style={{ color:"#00ff9d", fontSize:"15px", fontWeight:900 }}>T</span>
           </div>
           <div>
-            <div style={{ fontSize:isMobile?"12px":"14px", fontWeight:900, color:"#fff", letterSpacing:"0.2em" }}>
-              TRUTHGUARD
-            </div>
-            <div style={{ fontSize:"8px", color:"#888", letterSpacing:"0.15em" }}>AI FACT-CHECKING AGENT</div>
+            <div style={{ fontSize:isMobile?"13px":"14px", fontWeight:900, color:"#fff", letterSpacing:"0.2em" }}>TRUTHGUARD</div>
+            <div style={{ fontSize:"11px", color:"#aaa", letterSpacing:"0.1em" }}>AI FACT-CHECKING AGENT</div>
           </div>
         </div>
-        {!isMobile && (
-          <div style={{ display:"flex", gap:"14px", alignItems:"center" }}>
-            {Object.entries(TIERS).map(([k,t]) => (
-              <div key={k} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
-                <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:t.color }} />
-                <span style={{ fontSize:"9px", color:"#aaa" }}>{t.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{ display:"flex", alignItems:"center", gap:"6px",
+          background:"#00c8ff11", border:"1px solid #00c8ff44", borderRadius:"4px", padding:"5px 10px" }}>
+          <span style={{ color:"#00c8ff", fontSize:"11px", animation:"pulse 2s infinite" }}>●</span>
+          <span style={{ fontSize:"11px", color:"#00c8ff", letterSpacing:"0.1em" }}>WEB SEARCH ON</span>
+        </div>
       </div>
 
-      {/* CONTENT */}
       <div style={{ maxWidth:"860px", margin:"0 auto", padding:isMobile?"24px 14px 48px":"48px 24px 64px" }}>
 
-        {/* Hero */}
         <div style={{ textAlign:"center", marginBottom:isMobile?"24px":"40px" }}>
-          <div style={{ fontSize:"9px", color:"#00ff9d", letterSpacing:"0.4em", marginBottom:"10px" }}>
+          <div style={{ fontSize:"12px", color:"#00ff9d", letterSpacing:"0.3em", marginBottom:"10px" }}>
             ▸ MULTI-SOURCE VERIFICATION ENGINE
           </div>
           <h1 style={{ fontSize:isMobile?"24px":"clamp(28px,6vw,52px)", fontWeight:900, color:"#fff",
             letterSpacing:"0.04em", margin:"0 0 10px", lineHeight:1.15 }}>
             Is it TRUE or FALSE?
           </h1>
-          <p style={{ fontSize:isMobile?"12px":"13px", color:"#aaa", maxWidth:"420px", margin:"0 auto", lineHeight:1.8 }}>
-            Submit any claim. TruthGuard searches trusted sources,
-            cross-verifies evidence, and renders a verdict.
+          <p style={{ fontSize:isMobile?"13px":"14px", color:"#ccc", maxWidth:"460px", margin:"0 auto", lineHeight:1.8 }}>
+            Submit any claim. TruthGuard searches the web in real-time,
+            cross-verifies evidence from trusted sources, and renders a verdict.
           </p>
         </div>
 
-        {/* INPUT */}
         <div style={{ border:"1px solid #222", borderRadius:"8px", overflow:"hidden",
           background:"#0d0d0d", marginBottom:"14px" }}>
           <div style={{ padding:"10px 14px", borderBottom:"1px solid #161616",
             display:"flex", alignItems:"center", gap:"8px" }}>
-            <span style={{ color:"#00ff9d", fontSize:"10px", animation:"pulse 2s infinite" }}>●</span>
-            <span style={{ fontSize:"10px", color:"#ccc", letterSpacing:"0.25em" }}>CLAIM INPUT</span>
+            <span style={{ color:"#00ff9d", fontSize:"12px", animation:"pulse 2s infinite" }}>●</span>
+            <span style={{ fontSize:"12px", color:"#ddd", letterSpacing:"0.2em" }}>CLAIM INPUT</span>
           </div>
           <textarea value={claim} onChange={e => setClaim(e.target.value)}
             onKeyDown={e => { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();verify();} }}
             placeholder="Enter a claim to verify…" rows={isMobile?3:4}
             style={{ width:"100%", background:"transparent", border:"none",
-              padding:isMobile?"14px":"16px 18px", fontSize:isMobile?"16px":"14px",
-              color:"#ddd", resize:"none", lineHeight:1.7, fontFamily:"'Courier New', monospace" }} />
+              padding:isMobile?"14px":"16px 18px", fontSize:isMobile?"16px":"15px",
+              color:"#e0e0e0", resize:"none", lineHeight:1.7, fontFamily:"'Courier New', monospace" }} />
           <div style={{ padding:"10px 14px", borderTop:"1px solid #161616",
             display:"flex", justifyContent:"space-between", alignItems:"center", gap:"8px" }}>
-            <span style={{ fontSize:"10px", color:"#999" }}>
+            <span style={{ fontSize:"12px", color:"#bbb" }}>
               {isMobile ? "Tap VERIFY to check" : "ENTER to verify · SHIFT+ENTER for newline"}
             </span>
             <button onClick={verify} disabled={loading||!claim.trim()} style={{
@@ -230,7 +214,7 @@ export default function TruthGuard() {
               border: loading?"1px solid #00ff9d44":"none",
               color: loading?"#00ff9d":"#000",
               padding:isMobile?"12px 28px":"8px 24px", borderRadius:"4px",
-              fontSize:"11px", fontWeight:900, cursor:"pointer", letterSpacing:"0.2em",
+              fontSize:"12px", fontWeight:900, cursor:"pointer", letterSpacing:"0.2em",
               fontFamily:"'Courier New', monospace",
               opacity:(!claim.trim()&&!loading)?0.35:1, minWidth:"90px", flexShrink:0 }}>
               {loading ? "ANALYZING…" : "▸ VERIFY"}
@@ -238,23 +222,19 @@ export default function TruthGuard() {
           </div>
         </div>
 
-        {/* EXAMPLES */}
         <div style={{ display:"flex", flexWrap:"wrap", gap:"7px", marginBottom:isMobile?"24px":"36px" }}>
-          <span style={{ fontSize:"10px", color:"#999", letterSpacing:"0.1em", paddingTop:"5px", width:"100%" }}>
-            EXAMPLES:
-          </span>
+          <span style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.1em", paddingTop:"5px", width:"100%" }}>EXAMPLES:</span>
           {EXAMPLES.map(ex => (
             <button key={ex} onClick={() => setClaim(ex)} style={{
-              background:"transparent", border:"1px solid #2a2a2a", color:"#bbb",
-              padding:isMobile?"8px 12px":"5px 10px", borderRadius:"4px",
-              fontSize:isMobile?"12px":"10px", cursor:"pointer",
+              background:"transparent", border:"1px solid #333", color:"#ccc",
+              padding:isMobile?"8px 12px":"6px 12px", borderRadius:"4px",
+              fontSize:isMobile?"13px":"11px", cursor:"pointer",
               fontFamily:"'Courier New', monospace", lineHeight:1.4, textAlign:"left" }}>
               {ex}
             </button>
           ))}
         </div>
 
-        {/* LOADING */}
         {loading && (
           <div style={{ border:"1px solid #1e1e1e", borderRadius:"8px", background:"#0d0d0d",
             padding:isMobile?"32px 16px":"40px", display:"flex", flexDirection:"column",
@@ -262,70 +242,63 @@ export default function TruthGuard() {
             <div style={{ width:"40px", height:"40px", border:"1px solid #1e1e1e",
               borderTop:"1px solid #00ff9d", borderRadius:"50%", animation:"spin 1s linear infinite" }} />
             <div style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"12px", color:"#00ff9d", letterSpacing:"0.15em", marginBottom:"10px" }}>
-                {phase}
-              </div>
+              <div style={{ fontSize:"13px", color:"#00ff9d", letterSpacing:"0.15em", marginBottom:"10px" }}>{phase}</div>
               <div style={{ display:"flex", gap:"6px", justifyContent:"center" }}>
                 {phases.map((_,i) => (
                   <div key={i} style={{ width:"5px", height:"5px", borderRadius:"50%",
-                    background: phases.indexOf(phase)>=i?"#00ff9d":"#222", transition:"background 0.3s",
-                    boxShadow: phases.indexOf(phase)===i?"0 0 6px #00ff9d":"none" }} />
+                    background: phases.indexOf(phase)>=i?"#00ff9d":"#222", transition:"background 0.3s" }} />
                 ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* ERROR */}
         {error && (
           <div style={{ border:"1px solid #ff3b3b44", background:"#ff3b3b0f",
             borderRadius:"8px", padding:"18px", animation:"fadeIn 0.3s ease" }}>
-            <div style={{ fontSize:"11px", color:"#ff3b3b", letterSpacing:"0.2em", marginBottom:"6px" }}>⚠ AGENT ERROR</div>
-            <div style={{ fontSize:"13px", color:"#ff8080", lineHeight:1.6 }}>{error}</div>
+            <div style={{ fontSize:"13px", color:"#ff3b3b", letterSpacing:"0.2em", marginBottom:"6px" }}>⚠ AGENT ERROR</div>
+            <div style={{ fontSize:"14px", color:"#ff8080", lineHeight:1.6 }}>{error}</div>
           </div>
         )}
 
-        {/* RESULT */}
         {result && !loading && (
           <div ref={resultRef} style={{ animation:"fadeIn 0.5s ease" }}>
-            <div style={{ border:`1px solid ${accentColor}44`, borderRadius:"8px",
-              overflow:"hidden", background:"#0d0d0d" }}>
+            <div style={{ border:`1px solid ${accentColor}44`, borderRadius:"8px", overflow:"hidden", background:"#0d0d0d" }}>
 
               <div style={{ padding:isMobile?"14px":"20px 26px", borderBottom:"1px solid #151515",
-                display:"flex", alignItems:"center", justifyContent:"space-between",
-                flexWrap:"wrap", gap:"10px" }}>
+                display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"10px" }}>
                 <VerdictBadge verdict={result.verdict} />
                 <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
                   {result.breaking_news && (
                     <div style={{ background:"#ff3b3b22", border:"1px solid #ff3b3b44",
-                      borderRadius:"3px", padding:"4px 8px", fontSize:"9px", color:"#ff3b3b",
+                      borderRadius:"3px", padding:"5px 10px", fontSize:"11px", color:"#ff3b3b",
                       letterSpacing:"0.2em", animation:"pulse 1.5s infinite" }}>● BREAKING</div>
                   )}
                   <div style={{ background:"#ffffff08", border:"1px solid #ffffff14",
-                    borderRadius:"3px", padding:"4px 8px", fontSize:"9px", color:"#bbb",
+                    borderRadius:"3px", padding:"5px 10px", fontSize:"11px", color:"#ddd",
                     letterSpacing:"0.1em", textTransform:"uppercase" }}>{result.claim_type}</div>
                 </div>
               </div>
 
               <div style={{ padding:isMobile?"14px":"18px 26px", borderBottom:"1px solid #111" }}>
-                <div style={{ fontSize:"10px", color:"#999", letterSpacing:"0.25em", marginBottom:"8px" }}>VERIFIED CLAIM</div>
-                <div style={{ fontSize:isMobile?"14px":"15px", color:"#eee", lineHeight:1.7 }}>
+                <div style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.2em", marginBottom:"8px" }}>VERIFIED CLAIM</div>
+                <div style={{ fontSize:isMobile?"14px":"16px", color:"#f0f0f0", lineHeight:1.7 }}>
                   "<TypewriterText text={result.claim} />"
                 </div>
               </div>
 
               <div style={{ padding:isMobile?"14px":"18px 26px", borderBottom:"1px solid #111" }}>
-                <div style={{ fontSize:"10px", color:"#999", letterSpacing:"0.25em", marginBottom:"8px" }}>ANALYSIS</div>
-                <div style={{ fontSize:"13px", color:"#ccc", lineHeight:1.85 }}>{result.explanation}</div>
+                <div style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.2em", marginBottom:"8px" }}>ANALYSIS</div>
+                <div style={{ fontSize:"14px", color:"#ddd", lineHeight:1.85 }}>{result.explanation}</div>
               </div>
 
               <div style={{ padding:isMobile?"14px":"18px 26px", borderBottom:"1px solid #111" }}>
                 <ConfidenceMeter level={result.confidence} />
                 {result.search_queries_used?.length > 0 && (
                   <div style={{ marginTop:"14px" }}>
-                    <div style={{ fontSize:"10px", color:"#999", letterSpacing:"0.2em", marginBottom:"8px" }}>QUERIES RUN</div>
+                    <div style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.2em", marginBottom:"8px" }}>QUERIES RUN</div>
                     {result.search_queries_used.slice(0,3).map((q,i) => (
-                      <div key={i} style={{ fontSize:"11px", color:"#bbb", padding:"5px 0",
+                      <div key={i} style={{ fontSize:"13px", color:"#ccc", padding:"6px 0",
                         borderBottom:"1px solid #111", lineHeight:1.5 }}>▸ {q}</div>
                     ))}
                   </div>
@@ -333,13 +306,13 @@ export default function TruthGuard() {
               </div>
 
               <div style={{ padding:isMobile?"14px":"18px 26px" }}>
-                <div style={{ fontSize:"10px", color:"#999", letterSpacing:"0.2em", marginBottom:"10px" }}>
+                <div style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.2em", marginBottom:"10px" }}>
                   SOURCES CONSULTED ({result.sources?.length || 0})
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(2,1fr)", gap:"6px" }}>
                   {result.sources?.slice(0,6).map((s,i) => <SourceChip key={i} source={s} />)}
                   {(!result.sources||result.sources.length===0) && (
-                    <div style={{ fontSize:"12px", color:"#999" }}>No trusted sources found</div>
+                    <div style={{ fontSize:"13px", color:"#bbb" }}>No trusted sources found</div>
                   )}
                 </div>
               </div>
@@ -347,24 +320,21 @@ export default function TruthGuard() {
           </div>
         )}
 
-        {/* HISTORY */}
         {history.length > 0 && (
           <div style={{ marginTop:"36px" }}>
-            <div style={{ fontSize:"10px", color:"#999", letterSpacing:"0.3em", marginBottom:"10px" }}>
-              RECENT VERIFICATIONS
-            </div>
+            <div style={{ fontSize:"12px", color:"#bbb", letterSpacing:"0.25em", marginBottom:"10px" }}>RECENT VERIFICATIONS</div>
             <div style={{ display:"flex", flexDirection:"column", gap:"6px" }}>
               {history.map((h,i) => (
                 <div key={i} onClick={() => setClaim(h.claim)} style={{
                   display:"flex", alignItems:"center", gap:"10px",
                   padding:isMobile?"12px":"10px 14px", border:"1px solid #1a1a1a",
                   borderRadius:"4px", cursor:"pointer", background:"#0a0a0a" }}>
-                  <div style={{ fontSize:"10px", fontWeight:900,
+                  <div style={{ fontSize:"11px", fontWeight:900,
                     color: h.verdict==="TRUE"?"#00ff9d":h.verdict==="FALSE"?"#ff3b3b":"#fbbf24",
                     minWidth:isMobile?"70px":"80px", flexShrink:0 }}>{h.verdict}</div>
-                  <div style={{ fontSize:"12px", color:"#bbb", flex:1,
+                  <div style={{ fontSize:"13px", color:"#ccc", flex:1,
                     overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{h.claim}</div>
-                  <div style={{ fontSize:"10px", color:"#999", flexShrink:0 }}>
+                  <div style={{ fontSize:"11px", color:"#bbb", flexShrink:0 }}>
                     {h.time.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
                   </div>
                 </div>
@@ -374,8 +344,8 @@ export default function TruthGuard() {
         )}
 
         <div style={{ marginTop:"52px", borderTop:"1px solid #111", paddingTop:"18px", textAlign:"center" }}>
-          <div style={{ fontSize:"9px", color:"#444", letterSpacing:"0.25em" }}>
-            TRUTHGUARD · POWERED BY GROQ + LLAMA 3.3 · MULTI-SOURCE VERIFICATION
+          <div style={{ fontSize:"11px", color:"#555", letterSpacing:"0.2em" }}>
+            TRUTHGUARD · POWERED BY GROQ + LLAMA 3.3 · WEB SEARCH ENABLED
           </div>
         </div>
       </div>
