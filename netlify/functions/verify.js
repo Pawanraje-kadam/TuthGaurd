@@ -1,7 +1,6 @@
 // netlify/functions/verify.js
-// Node 18+ has fetch built-in — no imports needed
 
-const GROQ_KEY   = process.env.GROQ_API_KEY;
+const GROQ_KEY   = "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";
 const TAVILY_KEY = "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";
 
 exports.handler = async function (event, context) {
@@ -31,10 +30,6 @@ exports.handler = async function (event, context) {
 
   if (!claim || typeof claim !== "string") {
     return { statusCode: 400, body: JSON.stringify({ error: "Invalid claim" }) };
-  }
-
-  if (!GROQ_KEY) {
-    return { statusCode: 500, body: JSON.stringify({ error: "GROQ_API_KEY not configured in Netlify environment variables" }) };
   }
 
   const headers = {
