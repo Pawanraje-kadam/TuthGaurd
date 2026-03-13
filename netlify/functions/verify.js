@@ -1,12 +1,10 @@
 // netlify/functions/verify.js
-
-const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+// Node 18+ has fetch built-in — no imports needed
 
 const GROQ_KEY   = process.env.GROQ_API_KEY;
 const TAVILY_KEY = "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";
 
 exports.handler = async function (event, context) {
-  // CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
