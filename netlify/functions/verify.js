@@ -1,7 +1,7 @@
 // netlify/functions/verify.js
 
-const GROQ_KEY   = "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";
-const TAVILY_KEY = "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";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 exports.handler = async function (event, context) {
   if (event.httpMethod === "OPTIONS") {
