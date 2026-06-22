@@ -20,7 +20,7 @@
 
 **Submit any claim. TruthGuard searches the web in real-time, cross-verifies trusted sources, and delivers a verdict.**
 
-[🌐 Live Demo](https://taupe-souffle-3e5e33.netlify.app) · [📁 Project Files](#-project-structure) · [🚀 How to Deploy](#-deployment)
+[🌐 Live Demo](https://truth-guard-org.netlify.app/) · [📁 Project Files](#-project-structure) · [🚀 How to Deploy](#-deployment)
 
 </div>
 
