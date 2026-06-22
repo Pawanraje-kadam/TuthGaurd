@@ -45,7 +45,7 @@ exports.handler = async function (event, context) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          api_key: TAVILY_KEY,
+          api_key: TAVILY_API_KEY,        // ✅ FIXED
           query: claim,
           max_results: 6,
           search_depth: "advanced",
@@ -109,7 +109,7 @@ RESPOND ONLY with valid JSON, no markdown fences:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_KEY}`,
+        "Authorization": `Bearer ${GROQ_API_KEY}`,   // ✅ FIXED
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
