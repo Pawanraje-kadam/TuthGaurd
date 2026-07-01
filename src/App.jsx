@@ -14,7 +14,7 @@ const THEME = {
 
 const EXAMPLE_CATEGORIES = [
   { label: "🌍 NEWS",    color: "#00C8FF", items: ["Did OpenAI release GPT-5?", "Is Elon Musk the richest person in the world?"] },
-  { label: "🔬 SCIENCE", color: "#00FF9D", items: ["Did NASA confirm water on Mars?", "Is the Great Wall of China visible from space?"] },
+  { label: "🔬 SCIENCE", color: "#00FF9D", items: ["Do humans share approximately 60% of their DNA with bananas?"] },
   { label: "🌐 WORLD",   color: "#7B2FFF", items: ["Is India the most populous country in 2024?", "Did Apple release Vision Pro?"] },
 ];
 
