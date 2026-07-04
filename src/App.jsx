@@ -13,9 +13,9 @@ const THEME = {
 };
 
 const EXAMPLE_CATEGORIES = [
-  { label: "🌍 NEWS",    color: "#00C8FF", items: [": Did the United Nations recently launch an "AI Good" Global Commission to help shape international AI governance?"] },
-  { label: "🔬 SCIENCE", color: "#00FF9D", items: ["Do humans share approximately 60% of their DNA with bananas?"] },
-  { label: "🌐 WORLD",   color: "#7B2FFF", items: ["Are the Internet and the World Wide Web (WWW) the same thing?"] },
+  { label: "🌍 NEWS",    color: "#00C8FF", items: ["Did OpenAI release GPT-5?", "Is Elon Musk the richest person in the world?"] },
+  { label: "🔬 SCIENCE", color: "#00FF9D", items: ["Did NASA confirm water on Mars?", "Is the Great Wall of China visible from space?"] },
+  { label: "🌐 WORLD",   color: "#7B2FFF", items: ["Is India the most populous country in 2024?", "Did Apple release Vision Pro?"] },
 ];
 
 // ─── HOOKS ───────────────────────────────────────────────────────────────────
@@ -512,7 +512,7 @@ export default function TruthGuard() {
             </div>
           </div>
 
-          {/* EXAMPLES categorized */}
+          {/* EXAMPLES */}
           <div style={{ marginBottom: isMobile ? "32px" : "52px", animation: "staggerIn 0.8s 0.35s ease both" }}>
             <div style={{ fontSize: "11px", color: "#777", letterSpacing: "0.35em", marginBottom: "14px", fontFamily: THEME.fontMono, fontWeight: 800 }}>EXAMPLE QUERIES:</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -588,11 +588,18 @@ export default function TruthGuard() {
 
       {/* FOOTER */}
       <footer style={{ padding: isMobile ? "36px 16px" : "56px 44px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.5)" }}>
-        <div style={{ fontSize: "11px", color: "#555", letterSpacing: "0.4em", marginBottom: "14px", fontFamily: THEME.fontMono, fontWeight: 700 }}>DECENTRALIZED TRUTH PROTOCOL © 2045</div>
+        <div style={{ fontSize: "11px", color: "#555", letterSpacing: "0.4em", marginBottom: "14px", fontFamily: THEME.fontMono, fontWeight: 700 }}>DECENTRALIZED TRUTH PROTOCOL © 2026</div>
         <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "20px", fontSize: "11px", color: "#666", fontFamily: THEME.fontMono, fontWeight: 600 }}>
           <span>GROQ + LLAMA 3.3 70B</span>
           <span style={{ color: THEME.accent }}>● WEB SEARCH ENABLED</span>
           <span>MULTI-SOURCE VERIFIED</span>
+          <span style={{ color: "#444" }}>·</span>
+          <a
+            href="/privacy-policy"
+            style={{ color: "#555", textDecoration: "none", letterSpacing: "0.2em", transition: "color 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.color = THEME.accent}
+            onMouseLeave={e => e.currentTarget.style.color = "#555"}
+          >PRIVACY POLICY</a>
         </div>
       </footer>
     </div>
