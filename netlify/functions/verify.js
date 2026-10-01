@@ -103,23 +103,23 @@ RESPOND ONLY with valid JSON:
       ? `Verify this claim: "${claim.trim()}"\n\nWEB SEARCH RESULTS:\n${webContext}`
       : `Verify this claim: "${claim.trim()}"\n\n(No web results available. Use training knowledge and flag uncertainty.)`;
 
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        temperature: 0,
-        max_tokens: 1200,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
-      }),
-    });
+const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${GROQ_API_KEY}`,
+  },
+  body: JSON.stringify({
+    model: "openai/gpt-oss-20b",
+    temperature: 0,
+    max_tokens: 2500,          // room for reasoning + the JSON answer
+    reasoning_effort: "low",   // less thinking, faster, fewer cut-off answers
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userMessage },
+    ],
+  }),
+});
 
     const data = await groqRes.json();
     if (!groqRes.ok) {
