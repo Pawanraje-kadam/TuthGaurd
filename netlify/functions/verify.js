@@ -112,7 +112,7 @@ RESPOND ONLY with valid JSON, no markdown fences:
         "Authorization": `Bearer ${GROQ_API_KEY}`,   // ✅ FIXED
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-20b",
         temperature: 0,
         max_tokens: 1000,
         messages: [
