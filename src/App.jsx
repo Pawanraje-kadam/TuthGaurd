@@ -13,9 +13,9 @@ const THEME = {
 };
 
 const EXAMPLE_CATEGORIES = [
-  { label: "🌍 NEWS",    color: "#00C8FF", items: ["Did OpenAI release GPT-5?", "Is Elon Musk the richest person in the world?"] },
+  { label: "🌍 NEWS",    color: "#00C8FF", items: ["Did OpenAI release GPT Astra-7?", "Is Elon Musk the richest person in the world?"] },
   { label: "🔬 SCIENCE", color: "#00FF9D", items: ["Did NASA confirm water on Mars?", "Is the Great Wall of China visible from space?"] },
-  { label: "🌐 WORLD",   color: "#7B2FFF", items: ["Is India the most populous country in 2024?", "Did Apple release Vision Pro?"] },
+  { label: "🌐 WORLD",   color: "#7B2FFF", items: ["Is India the most populous country in 2027?", "Did Apple release Vision Pro?"] },
 ];
 
 // ─── HOOKS ───────────────────────────────────────────────────────────────────
@@ -211,7 +211,7 @@ function HowItWorks({ isMobile }) {
   const steps = [
     { icon: "📝", title: "Submit Claim",     desc: "Type any statement, headline, or rumour you want verified." },
     { icon: "🔍", title: "Live Web Search",  desc: "Tavily searches the internet in real-time for current info." },
-    { icon: "🤖", title: "AI Cross-Verify",  desc: "Llama 3.3 reads results from Tier 1 sources and evaluates evidence." },
+    { icon: "🤖", title: "AI Cross-Verify",  desc: "GPT-oss reads results from Tier 1 sources and evaluates evidence." },
     { icon: "⚖️", title: "Verdict Rendered", desc: "TRUE, FALSE, or UNVERIFIED — with explanation and sources." },
   ];
   return (
