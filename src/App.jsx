@@ -470,7 +470,7 @@ export default function TruthGuard() {
           <div style={{ width: "38px", height: "38px", border: `2px solid ${THEME.accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "19px", fontWeight: 900, color: THEME.accent, animation: "floatingLogo 4s ease-in-out infinite", boxShadow: `0 0 16px ${THEME.accent}44` }}>Σ</div>
           <div>
             <div style={{ fontSize: isMobile ? "14px" : "16px", fontWeight: 900, letterSpacing: "0.22em", color: "#fff" }}>TRUTHGUARD</div>
-            <div style={{ fontSize: "9px", fontFamily: THEME.fontMono, color: THEME.accent, letterSpacing: "0.35em", fontWeight: 700 }}>NEURAL_ORACLE v2.5</div>
+            <div style={{ fontSize: "9px", fontFamily: THEME.fontMono, color: THEME.accent, letterSpacing: "0.35em", fontWeight: 700 }}>NEURAL_ORACLE v2.6</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", background: `${THEME.info}0a`, border: `1px solid ${THEME.info}33`, borderRadius: "99px", padding: "6px 14px" }}>
