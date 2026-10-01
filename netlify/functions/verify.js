@@ -1,75 +1,73 @@
 // netlify/functions/verify.js
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Content-Type": "application/json",
+};
 
-exports.handler = async function (event, context) {
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-      body: "",
-    };
-  }
+const reply = (statusCode, obj) => ({
+  statusCode,
+  headers: CORS,
+  body: JSON.stringify(obj),
+});
 
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
-  }
+exports.handler = async function (event) {
+  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers: CORS, body: "" };
+  if (event.httpMethod !== "POST") return reply(405, { error: "Method not allowed" });
+
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+
+  if (!GROQ_API_KEY) return reply(500, { error: "GROQ_API_KEY is not set in environment variables" });
 
   let claim;
   try {
-    const body = JSON.parse(event.body || "{}");
-    claim = body.claim;
+    claim = JSON.parse(event.body || "{}").claim;
   } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON body" }) };
+    return reply(400, { error: "Invalid JSON body" });
   }
-
-  if (!claim || typeof claim !== "string") {
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid claim" }) };
-  }
-
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
-  };
+  if (!claim || typeof claim !== "string") return reply(400, { error: "Invalid claim" });
 
   try {
-    // STEP 1: Web search with Tavily for real-time info
+    // STEP 1: Tavily web search
     let webContext = "";
-    try {
-      const searchRes = await fetch("https://api.tavily.com/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          api_key: TAVILY_API_KEY,        // ✅ FIXED
-          query: claim,
-          max_results: 6,
-          search_depth: "advanced",
-          include_answer: true,
-        }),
-      });
-      if (searchRes.ok) {
-        const searchData = await searchRes.json();
-        const results = searchData.results || [];
-        const snippets = results
-          .slice(0, 6)
-          .map(r => `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${r.content}`)
-          .join("\n\n---\n\n");
-        webContext = searchData.answer
-          ? `WEB SUMMARY: ${searchData.answer}\n\n---\n\n${snippets}`
-          : snippets;
+    if (!TAVILY_API_KEY) {
+      console.warn("TAVILY_API_KEY missing, skipping web search");
+    } else {
+      try {
+        const searchRes = await fetch("https://api.tavily.com/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TAVILY_API_KEY}`,
+          },
+          body: JSON.stringify({
+            query: claim,
+            max_results: 5,
+            search_depth: "basic", // faster, avoids function timeout
+            include_answer: true,
+          }),
+        });
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          const snippets = (searchData.results || [])
+            .map(r => `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${r.content}`)
+            .join("\n\n---\n\n");
+          webContext = searchData.answer
+            ? `WEB SUMMARY: ${searchData.answer}\n\n---\n\n${snippets}`
+            : snippets;
+        } else {
+          console.warn("Tavily error:", searchRes.status, await searchRes.text());
+        }
+      } catch (e) {
+        console.warn("Tavily search failed:", e.message);
       }
-    } catch (searchErr) {
-      console.warn("Tavily search failed:", searchErr.message);
     }
 
-    // STEP 2: Groq LLM analysis with web context
+    // STEP 2: Groq analysis
     const today = new Date().toDateString();
-
     const SYSTEM_PROMPT = `You are TruthGuard, an elite AI fact-checking agent with real-time web search results.
 
 Today's date is ${today}.
@@ -87,7 +85,7 @@ TRUSTED SOURCE TIERS:
 - Tier 3: CNN, NBC News, ABC News, NPR, CBS News
 - Official: .gov websites, WHO, UN, CDC
 
-RESPOND ONLY with valid JSON, no markdown fences:
+RESPOND ONLY with valid JSON:
 {
   "claim": "rewritten claim as a clear statement",
   "verdict": "TRUE" | "FALSE" | "UNVERIFIED",
@@ -103,47 +101,44 @@ RESPOND ONLY with valid JSON, no markdown fences:
 
     const userMessage = webContext
       ? `Verify this claim: "${claim.trim()}"\n\nWEB SEARCH RESULTS:\n${webContext}`
-      : `Verify this claim: "${claim.trim()}"\n\n(No web results available — use training knowledge and flag uncertainty.)`;
+      : `Verify this claim: "${claim.trim()}"\n\n(No web results available. Use training knowledge and flag uncertainty.)`;
 
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`,   // ✅ FIXED
+        Authorization: `Bearer ${GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-20b",
+        model: "llama-3.3-70b-versatile",
         temperature: 0,
-        max_tokens: 1000,
+        max_tokens: 1200,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user",   content: userMessage },
+          { role: "user", content: userMessage },
         ],
       }),
     });
 
     const data = await groqRes.json();
-    if (!groqRes.ok) throw new Error(data.error?.message || "Groq API error");
+    if (!groqRes.ok) {
+      throw new Error(`Groq ${groqRes.status}: ${data.error?.message || "API error"}`);
+    }
 
     const text = data.choices?.[0]?.message?.content || "";
-
     let parsed;
     try {
       parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
     } catch {
       const match = text.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-      else throw new Error("Could not parse AI response");
+      if (!match) throw new Error("Could not parse AI response");
+      parsed = JSON.parse(match[0]);
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify(parsed) };
-
+    return reply(200, parsed);
   } catch (err) {
     console.error("TruthGuard error:", err);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: err.message || "Verification failed" }),
-    };
+    return reply(500, { error: err.message || "Verification failed" });
   }
 };
